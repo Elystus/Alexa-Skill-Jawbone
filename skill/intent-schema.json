@@ -1,0 +1,49 @@
+{
+  "intents": [
+    {
+    	"intent": "GetHelp",
+      	"slots": [
+        {
+          "name": "RequestDate",
+          "type": "AMAZON.DATE"
+        }
+    ]
+    },
+    {
+		"intent": "GetHeartrate",
+      	"slots": [
+        {
+          "name": "RequestDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
+  	},
+    {
+		"intent": "GetSteps",
+      	"slots": [
+        {
+          "name": "RequestDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
+    },
+    {
+    	"intent": "GetSleep",
+      	"slots": [
+        {
+          "name": "RequestDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
+    },
+    {
+    	"intent": "GetExit",
+      	"slots": [
+        {
+          "name": "RequestDate",
+          "type": "AMAZON.DATE"
+        }
+    ]
+    }
+  ]
+}

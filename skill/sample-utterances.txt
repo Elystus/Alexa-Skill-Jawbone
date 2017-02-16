@@ -1,0 +1,39 @@
+GetHelp Help
+GetHelp I don't get it
+GetHelp What are you able to do
+GetHelp What can I ask you
+GetHeartrate my heartrate on {RequestDate}
+GetHeartrate my resting heartrate on {RequestDate}
+GetHeartrate what was my heartrate on {RequestDate}
+GetHeartrate what was my resting heartrate on {RequestDate}
+GetHeartrate what my heartrate was on {RequestDate}
+GetHeartrate what my resting heartrate was on {RequestDate}
+GetHeartrate my heartrate
+GetHeartrate my resting heartrate
+GetHeartrate what is my heartrate
+GetHeartrate what my heartrate is
+GetHeartrate what my resting heartrate is
+GetSteps how many steps did I take on {RequestDate}
+GetSteps what was my stepcount on {RequestDate}
+GetSteps how many steps I took {RequestDate}
+GetSteps how far did I walk on {RequestDate}
+GetSteps stepcount on {RequestDate}
+GetSteps how many steps did I take
+GetSteps what is my stepcount
+GetSteps how many steps did I take
+GetSteps how many steps did I take today
+GetSteps how far did I walk
+GetSteps how far did I walk today
+GetSteps stepcount
+GetSteps stepcount today
+GetSleep how I slept on {RequestDate}
+GetSleep how did I sleep on {RequestDate}
+GetSleep how long did I sleep on {RequestDate}
+GetSleep how many times I woke up on {RequestDate}
+GetSleep how I slept
+GetSleep how did I sleep
+GetSleep how long did I sleep
+GetSleep how many times did I wake up
+GetExit Goodbye
+GetExit Leave me
+GetExit Sleep
