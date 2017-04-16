@@ -27,6 +27,8 @@ class RequestAbstract(object):
 
 class RequestIntent(RequestAbstract):
 
+  response_error_message = 'Sorry, I was not able to finish your request.'
+
   def __init__(self, event, context):
     super(RequestIntent, self).__init__(event, context)
 
@@ -35,17 +37,26 @@ class RequestIntent(RequestAbstract):
     return request_type == 'IntentRequest'
 
   def process(self):
-    user_intent = self.event['request']['intent'].get('name')
-    user_access_token = self.event['session']['user'].get('accessToken')
-    user_session_new = self.event['session'].get('new')
-    user_request_date = None
-    if self.event['request']['intent']['slots'].get('RequestDate'):
-      user_request_date = self.event['request']['intent']['slots']['RequestDate'].get('value')
-    intent_handler = AlexaHandlerFactory(user_intent, user_access_token, user_request_date, user_session_new)
-    return intent_handler.process_intent()
+    try:
+      user_intent = self.event['request']['intent'].get('name')
+      user_access_token = self.event['session']['user'].get('accessToken')
+      user_session_new = self.event['session'].get('new')
+      user_request_date = None
+      if self.event['request']['intent']['slots'].get('RequestDate'):
+        user_request_date = self.event['request']['intent']['slots']['RequestDate'].get('value')
+      intent_handler = AlexaHandlerFactory(user_intent, user_access_token, user_request_date, user_session_new)
+      return intent_handler.process_intent()
+    except Exception as e:
+      logging.error('There as an error processing this request. '
+                    '\nEvent: {} '
+                    '\nContext: {}'.format(self.event, self.context))
+      return AlexaResponse.build_response(self.response_error_message)
+
 
 
 class RequestLaunch(RequestAbstract):
+
+  response_message = 'Jawbone. Everything is looking up!'
 
   def __init__(self, event, context):
     super(RequestLaunch, self).__init__(event, context)
@@ -55,10 +66,12 @@ class RequestLaunch(RequestAbstract):
     return request_type == 'LaunchRequest'
 
   def process(self):
-    return AlexaResponse.build_response('Jawbone. Everything is looking Up.', end_session=False)
+    return AlexaResponse.build_response(self.response_message, end_session=False)
 
 
 class RequestEnd(RequestAbstract):
+
+  response_message = 'Jawbone powering down. Goodbye!'
 
   def __init__(self, event, context):
     super(RequestEnd, self).__init__(event, context)
@@ -68,10 +81,12 @@ class RequestEnd(RequestAbstract):
     return request_type == 'SessionEndedRequest'
 
   def process(self):
-    return AlexaResponse.build_response('Jawbone powering down.')
+    return AlexaResponse.build_response(self.response_message)
 
 
 class RequestError(RequestAbstract):
+
+  response_message = 'Sorry, I was not able to finish your request.'
 
   def __init__(self, event, context):
     super(RequestError, self).__init__(event, context)

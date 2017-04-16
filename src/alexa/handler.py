@@ -1,5 +1,6 @@
 from alexa.response import AlexaResponse
 from jawbone.api import APIRequest
+import logging
 
 
 class AlexaHandlerFactory(object):
@@ -40,9 +41,9 @@ class HandlerAbstract(object):
 class HelpHandler(HandlerAbstract):
 
   response = '''Ask me questions, such as:
-                        How did I sleep last night?
-                        What is my resting heartrate?
-                        How many steps did I take on December 23, 2016? '''
+                How did I sleep last night?
+                What is my resting heartrate?
+                How many steps did I take on December 23, 2016? '''
 
   def __init__(self, access_token, request_date, session_end=True):
     super(HelpHandler, self).__init__(access_token, request_date, session_end)
@@ -87,24 +88,24 @@ class HeartrateHandler(HandlerAbstract):
 
   def process_intent(self):
     if self.fetch_data_from_api('heartrate'):
-      recent_heartrate = self.process_data()
-      if recent_heartrate:
-        return AlexaResponse.build_response(self.response_success.format(recent_heartrate), end_session=self.session_end)
-      else:
-        return AlexaResponse.build_response(self.response_failure, end_session=self.session_end)
+      message = self.process_data()
+      message = message if message else self.response_errored
+      return AlexaResponse.build_response(message, end_session=self.session_end)
     else:
       return AlexaResponse.build_response(self.response_errored)
 
   def process_data(self):
-    heartrate = ''
-    print self.data
-    print self.data['data']
-    print self.data['data']['items']
-    for item in self.data['data']['items']:
-        if item.get('resting_heartrate'):
-          heartrate = item['resting_heartrate']
-          break
-    return heartrate
+    try:
+      heartrate = ''
+      for item in self.data['data']['items']:
+          if item.get('resting_heartrate'):
+            heartrate = item['resting_heartrate']
+            break
+      return self.response_success.format(heartrate)
+    except Exception as e:
+      logging.error('Unable to process data from Jawbone. Error: {} Data: {}'.format(e, self.data))
+      return ''
+
 
 
 class StepsHandler(HandlerAbstract):
@@ -123,16 +124,21 @@ class StepsHandler(HandlerAbstract):
   def process_intent(self):
     if self.fetch_data_from_api('goals'):
       message = self.process_data()
+      message = message if message else self.response_errored
       return AlexaResponse.build_response(message, end_session=self.session_end)
     else:
       return AlexaResponse.build_response(self.response_errored)
 
   def process_data(self):
-    steps_goal = self.data['data']['move_steps']
-    steps_left = self.data['data']['remaining_for_day']['move_steps_remaining']
-    steps_total = steps_goal - steps_left
-    steps_congrats = 'Good Job!' if steps_goal < steps_total else ''
-    return self.response_success.format(steps_total, steps_goal, steps_congrats)
+    try:
+      steps_goal = int(self.data['data']['move_steps'])
+      steps_left = int(self.data['data']['remaining_for_day']['move_steps_remaining'])
+      steps_total = steps_goal - steps_left
+      steps_congrats = 'Good Job!' if steps_goal < steps_total else ''
+      return self.response_success.format(steps_total, steps_goal, steps_congrats)
+    except Exception as e:
+      logging.error('Unable to process data from Jawbone. Error: {} Data: {}'.format(e, self.data))
+      return ''
 
 
 class SleepHandler(HandlerAbstract):
@@ -152,6 +158,7 @@ class SleepHandler(HandlerAbstract):
     if self.fetch_data_from_api('sleeps'):
       if self.data['data'].get('items'):
         message = self.process_data()
+        message = message if message else self.response_errored
         return AlexaResponse.build_response(message, end_session=self.session_end)
       else:
         return AlexaResponse.build_response(self.response_failure, end_session=self.session_end)
@@ -159,12 +166,16 @@ class SleepHandler(HandlerAbstract):
       return AlexaResponse.build_response(self.response_errored)
 
   def process_data(self):
-    sleep_data = self.data['data']['items'][0]['details']
-    sleep_total_minutes, _ = divmod(sleep_data['duration'] - sleep_data['awake'], 60)
-    sleep_total_hours, sleep_total_minutes = divmod(sleep_total_minutes, 60)
-    sleep_awakenings = sleep_data['awakenings']
-    if sleep_awakenings != 1:
-      sleep_awakenings_string = "{} times".format(sleep_awakenings)
-    else:
-      sleep_awakenings_string = "{} time".format(sleep_awakenings)
-    return self.response_success.format(sleep_total_hours, sleep_total_minutes, sleep_awakenings_string)
+    try:
+      sleep_data = self.data['data']['items'][0]['details']
+      sleep_total_minutes, _ = divmod(int(sleep_data['duration']) - int(sleep_data['awake']), 60)
+      sleep_total_hours, sleep_total_minutes = divmod(sleep_total_minutes, 60)
+      sleep_awakenings = sleep_data['awakenings']
+      if sleep_awakenings != 1:
+        sleep_awakenings_string = "{} times".format(sleep_awakenings)
+      else:
+        sleep_awakenings_string = "{} time".format(sleep_awakenings)
+      return self.response_success.format(sleep_total_hours, sleep_total_minutes, sleep_awakenings_string)
+    except Exception as e:
+      logging.error('Unable to process data from Jawbone. Error: {} Data: {}'.format(e, self.data))
+      return ''
