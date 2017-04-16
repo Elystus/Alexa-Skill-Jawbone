@@ -18,4 +18,6 @@ if [ -d "src/venv" ]; then
     zip -r ../jawbone.zip *
     cd ../
     rm -rf makezip
+else
+    echo "Please setup the virtual environment (venv)"
 fi
